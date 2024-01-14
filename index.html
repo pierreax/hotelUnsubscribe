@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unsubscribe Page</title>
+</head>
+<body>
+
+<h1>Unsubscribe</h1>
+
+<script>
+    // Function to extract the token from the URL
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // Function to unsubscribe when the page loads
+    window.onload = function() {
+        const token = getQueryParam('token');
+
+        if (token) {
+            // Make an API request to remove the subscriber's row
+            fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices/8`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.status === 204) {
+                    // Successfully unsubscribed
+                    document.body.innerHTML = "<p>You have been unsubscribed from our emails.</p>";
+                } else {
+                    // Handle errors or other status codes
+                    document.body.innerHTML = "<p>Failed to unsubscribe. Please try again or contact support.</p>";
+                }
+            })
+            .catch(error => {
+                // Handle network errors
+                console.error(error);
+                document.body.innerHTML = "<p>Failed to unsubscribe. Please try again later.</p>";
+            });
+        } else {
+            // Token not found in URL, handle accordingly
+            document.body.innerHTML = "<p>Invalid unsubscribe link.</p>";
+        }
+    }
+</script>
+
+</body>
+</html>
