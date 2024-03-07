@@ -72,7 +72,7 @@
                             document.body.innerHTML = "<p>Failed to unsubscribe. Please try again later.</p>";
                         });
                     } else {
-                        document.body.innerHTML = "<p>Invalid unsubscribe link or token not found.</p>";
+                        document.body.innerHTML = "<p>Invalid unsubscribe link or token not found. This is most likely because you already subscribed from this trip.</p>";
                     }
                 })
                 .catch(error => {
