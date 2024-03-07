@@ -51,6 +51,7 @@
                 .then(data => {
                     const prices = data.prices;
                     const row = prices.find(p => p.token === token);
+                    console.log('Row' ,row);
 
                     if (row) {
                         // Step 3: Delete the row with the corresponding ID
