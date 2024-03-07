@@ -38,30 +38,27 @@
     // Function to unsubscribe when the page loads
     window.onload = function() {
         const token = getQueryParam('token');
-        console.log("Token from URL:", token); // Log the token retrieved from URL
 
         if (token) {
+            const headers = {
+                'Authorization': 'Bearer 5231bb69-e013-4bf1-97d4-19154d764b31',
+                'Content-Type': 'application/json'
+            };
+
             // Step 1: Fetch the list and find the row with the matching token
-            fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices')
-                .then(response => {
-                    console.log("Fetch response:", response); // Log the fetch response
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+            fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices', { headers: headers })
+                .then(response => response.json())
                 .then(data => {
-                    console.log("Data fetched:", data); // Log the data fetched
                     const prices = data.prices;
                     const row = prices.find(p => p.token === token);
-                    console.log("Row found:", row); // Log the found row (or null if not found)
 
                     if (row) {
+                        // Step 3: Delete the row with the corresponding ID
                         fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices/${row.id}`, {
-                            method: 'DELETE'
+                            method: 'DELETE',
+                            headers: headers // Include the headers with the bearer token here as well
                         })
                         .then(response => {
-                            console.log("Delete response:", response); // Log the delete response
                             if (response.ok) {
                                 document.body.innerHTML = "<p>You have been unsubscribed from our emails.</p>"
                                     + "<p>We'll miss you, but you're always welcome back to set up a new alert anytime in the future.</p>";
@@ -70,7 +67,7 @@
                             }
                         })
                         .catch(error => {
-                            console.error("Delete request error:", error); // Log any errors from the delete request
+                            console.error(error);
                             document.body.innerHTML = "<p>Failed to unsubscribe. Please try again later.</p>";
                         });
                     } else {
@@ -78,7 +75,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error("Fetch data error:", error); // Log any errors from the initial fetch request
+                    console.error(error);
                     document.body.innerHTML = "<p>Failed to retrieve data. Please try again later.</p>";
                 });
         } else {
@@ -86,6 +83,7 @@
         }
     }
 </script>
+
 
 </body>
 </html>
