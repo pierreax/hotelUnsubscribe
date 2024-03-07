@@ -38,48 +38,50 @@
     // Function to unsubscribe when the page loads
     window.onload = function() {
         const token = getQueryParam('token');
+        console.log("Token from URL:", token); // Log the token retrieved from URL
 
         if (token) {
             // Step 1: Fetch the list and find the row with the matching token
             fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices')
-                .then(response => response.json())
+                .then(response => {
+                    console.log("Fetch response:", response); // Log the fetch response
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log("Data fetched:", data); // Log the data fetched
                     const prices = data.prices;
-                    const row = prices.find(p => p.token === token); // Assumes your data has a 'token' field
+                    const row = prices.find(p => p.token === token);
+                    console.log("Row found:", row); // Log the found row (or null if not found)
 
-                    // Step 2: Check if the row with the token was found
                     if (row) {
-                        // Step 3: Delete the row with the corresponding ID
                         fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices/${row.id}`, {
                             method: 'DELETE'
                         })
                         .then(response => {
+                            console.log("Delete response:", response); // Log the delete response
                             if (response.ok) {
-                                // Successfully unsubscribed
                                 document.body.innerHTML = "<p>You have been unsubscribed from our emails.</p>"
                                     + "<p>We'll miss you, but you're always welcome back to set up a new alert anytime in the future.</p>";
                             } else {
-                                // Handle errors or other status codes
                                 document.body.innerHTML = "<p>Failed to unsubscribe. Please try again or contact support.</p>";
                             }
                         })
                         .catch(error => {
-                            // Handle network errors
-                            console.error(error);
+                            console.error("Delete request error:", error); // Log any errors from the delete request
                             document.body.innerHTML = "<p>Failed to unsubscribe. Please try again later.</p>";
                         });
                     } else {
-                        // Token not found in the list, handle accordingly
                         document.body.innerHTML = "<p>Invalid unsubscribe link or token not found.</p>";
                     }
                 })
                 .catch(error => {
-                    // Handle network errors
-                    console.error(error);
+                    console.error("Fetch data error:", error); // Log any errors from the initial fetch request
                     document.body.innerHTML = "<p>Failed to retrieve data. Please try again later.</p>";
                 });
         } else {
-            // Token not found in URL, handle accordingly
             document.body.innerHTML = "<p>Invalid unsubscribe link.</p>";
         }
     }
