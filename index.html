@@ -48,11 +48,10 @@
         if (token) {
             const headers = {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer 5231bb69-e013-4bf1-97d4-19154d764b31'
             };
 
             // Step 1: Fetch the list and find the row with the matching token
-            fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices', { headers: headers })
+            fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices', { headers: headers })
                 .then(response => response.json())
                 .then(data => {
                     const prices = data.prices;
@@ -61,7 +60,7 @@
 
                     if (row) {
                         // Step 2: Delete the row with the corresponding ID
-                        fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/flightDeals/prices/${row.id}`, {
+                        fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices/${row.id}`, {
                             method: 'DELETE',
                             headers: headers // Include the headers with the bearer token here as well
                         })
@@ -69,7 +68,7 @@
                             if (response.ok) {
                                 document.body.innerHTML = "<p>You have been unsubscribed from our emails.</p>"
                                     + "<p>We'll miss you, but you're always welcome back to set up a new alert anytime in the future.</p>"
-                                    + `<p><a href="https://www.robotize.no/flights" class="signup-link">Click here</a> To sign up for new flight alerts.</p>`;
+                                    + `<p><a href="https://www.robotize.no/hotels" class="signup-link">Click here</a> To sign up for new hotel alerts.</p>`;
                             } else {
                                 document.body.innerHTML = "<p>Failed to unsubscribe. Please try again or contact support.</p>";
                             }
