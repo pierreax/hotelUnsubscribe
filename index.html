@@ -1,96 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Unsubscribe Page</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe — Robotize Hotels</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f4f7fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            padding: 28px 32px;
             text-align: center;
-            background-color: #f5f5f5;
         }
-
-        h1 {
-            color: #333;
-        }
-
-        p {
-            font-size: 18px;
-            color: #555;
-        }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .signup-link {
-            display: block;
-            margin-top: 20px;
+        .card-header h1 {
+            color: #ffffff;
             font-size: 20px;
+            font-weight: 600;
         }
+        .card-body {
+            padding: 32px;
+            text-align: center;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e8eaed;
+            border-top-color: #2e7d32;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .message {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #202124;
+        }
+        .message p { margin-bottom: 16px; }
+        .message .subtle { color: #5f6368; font-size: 14px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 6px;
+            background-color: #2e7d32;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #1b5e20; }
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+        }
+        .status-icon.success { background-color: #e6f4ea; color: #2e7d32; }
+        .status-icon.error   { background-color: #fce8e6; color: #c62828; }
+        .status-icon.warning { background-color: #fff3e0; color: #e65100; }
     </style>
 </head>
 <body>
 
-<h1>Unsubscribe</h1>
+<div class="card">
+    <div class="card-header">
+        <h1>Unsubscribe</h1>
+    </div>
+    <div class="card-body" id="content">
+        <div class="spinner"></div>
+        <p class="message subtle">Processing your request...</p>
+    </div>
+</div>
 
 <script>
-    // Function to extract the token from the URL
     function getQueryParam(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
+        return new URLSearchParams(window.location.search).get(name);
     }
 
-    // Function to unsubscribe when the page loads
-    window.onload = function() {
+    function render(icon, iconClass, lines, btnText, btnHref) {
+        let html = `<div class="status-icon ${iconClass}">${icon}</div><div class="message">`;
+        lines.forEach(l => html += `<p${l.subtle ? ' class="subtle"' : ''}>${l.text}</p>`);
+        if (btnText) html += `<a href="${btnHref}" class="btn">${btnText}</a>`;
+        html += '</div>';
+        document.getElementById('content').innerHTML = html;
+    }
+
+    window.onload = function () {
         const token = getQueryParam('token');
 
-        if (token) {
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-
-            // Step 1: Fetch the list and find the row with the matching token
-            fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices', { headers: headers })
-                .then(response => response.json())
-                .then(data => {
-                    const prices = data.prices;
-                    const row = prices.find(p => p.token === token);
-                    console.log('Row', row);
-
-                    if (row) {
-                        // Step 2: Delete the row with the corresponding ID
-                        fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices/${row.id}`, {
-                            method: 'DELETE',
-                            headers: headers // Include the headers with the bearer token here as well
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                document.body.innerHTML = "<p>You have been unsubscribed from our emails.</p>"
-                                    + "<p>We'll miss you, but you're always welcome back to set up a new alert anytime in the future.</p>"
-                                    + `<p><a href="https://www.robotize.no/hotels" class="signup-link">Click here</a> To sign up for new hotel alerts.</p>`;
-                            } else {
-                                document.body.innerHTML = "<p>Failed to unsubscribe. Please try again or contact support.</p>";
-                            }
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            document.body.innerHTML = "<p>Failed to unsubscribe. Please try again later.</p>";
-                        });
-                    } else {
-                        document.body.innerHTML = "<p>Invalid unsubscribe link or token not found. This is most likely because you already unsubscribed from this trip.</p>";
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    document.body.innerHTML = "<p>Failed to retrieve data. Please try again later.</p>";
-                });
-        } else {
-            document.body.innerHTML = "<p>Invalid unsubscribe link.</p>";
+        if (!token) {
+            render('?', 'warning',
+                [{ text: 'This unsubscribe link is not valid.' },
+                 { text: 'If you already unsubscribed, no further action is needed.', subtle: true }],
+                'Visit Robotize Hotels', 'https://hotels.robotize.no');
+            return;
         }
-    }
-</script>
 
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        fetch('https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices', { headers })
+            .then(r => r.json())
+            .then(data => {
+                const row = data.prices.find(p => p.token === token);
+                if (!row) {
+                    render('?', 'warning',
+                        [{ text: 'This unsubscribe link is invalid or has already been used.' },
+                         { text: 'If you already unsubscribed, no further action is needed.', subtle: true }],
+                        'Visit Robotize Hotels', 'https://hotels.robotize.no');
+                    return;
+                }
+                return fetch(`https://api.sheety.co/f3a65c5d3619ab6b57dcfe118df98456/hotels/prices/${row.id}`, {
+                    method: 'DELETE', headers
+                });
+            })
+            .then(response => {
+                if (!response) return;
+                if (response.ok) {
+                    render('&#10003;', 'success',
+                        [{ text: 'You have been unsubscribed from this trip\'s price alerts.' },
+                         { text: 'We\'ll miss you! You\'re always welcome to set up a new alert.', subtle: true }],
+                        'Set Up New Alert', 'https://hotels.robotize.no');
+                } else {
+                    render('&#10007;', 'error',
+                        [{ text: 'Something went wrong while unsubscribing. Please try again.' },
+                         { text: 'If this keeps happening, reply to one of our emails for support.', subtle: true }]);
+                }
+            })
+            .catch(() => render('&#10007;', 'error',
+                [{ text: 'Could not connect to the server. Please try again later.' },
+                 { text: 'If this keeps happening, reply to one of our emails for support.', subtle: true }]));
+    };
+</script>
 
 </body>
 </html>
